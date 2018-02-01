@@ -1,7 +1,11 @@
 import collections
+from my_utils.my_logging import log_message as log
+from my_utils.consts import ints_str_list as ints_str
 
+#todo add url scrapeing
 
 class Data_Scraper:
+    # todo make it more elegant by using map rather than having a for loop in each method
     # every methode in this class will be applied to the the results
     # they all must take the list of results as an argument and add a list to the dict in this object and have no return
     # a list in which each result lines up with a result from the argument
@@ -114,4 +118,8 @@ class Data_Scraper:
                     result['data-ds-bundleid'])
                 self.scraped_dict["is_bundle"].append(True)
                 self.scraped_dict["is_old_bundle"].append(False)
+
+    def get_href(self, results_list):
+        for result in results_list:
+            self.scraped_dict["href"].append(result['href'])
 

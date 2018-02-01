@@ -1,7 +1,11 @@
+from my_utils.my_logging import log_message as log
+
+#todo figure out what a resonable filter setting
 
 class Filter:
     # every methode in this class will be applied to the the results
     # they all must take the list of results as an argument and returns the filtered list
+
 
     minimum_discount = 40
 
@@ -20,8 +24,8 @@ class Filter:
 
     # parameters for get_good_games
     # todo make configureable via gui
-    min_reviews = 100
-    min_positive = 75
+    min_reviews = 10
+    min_positive = 40
 
     def get_good_games(self, merged_results, keys):
         n_rev_idx = keys['n_user_reviews']
