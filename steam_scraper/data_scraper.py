@@ -119,7 +119,12 @@ class Data_Scraper:
                 self.scraped_dict["is_bundle"].append(True)
                 self.scraped_dict["is_old_bundle"].append(False)
 
-    def get_href(self, results_list):
-        for result in results_list:
-            self.scraped_dict["href"].append(result['href'])
+    # def get_href(self, results_list):
+    #     for result in results_list:
+    #         self.scraped_dict["href"].append(result['href'])
+
+    # def get_tumbnail(self, results_list):
+    #     for result in results_list:
+    #         thumbnail = result.find('div', {'class': 'col search_capsule'}).find("img")["src"]
+    #         self.scraped_dict["thumbnail"].append(thumbnail)
 

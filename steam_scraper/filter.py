@@ -1,6 +1,7 @@
 from my_utils.my_logging import log_message as log
 
 #todo figure out what a resonable filter setting
+#todo make configureable from the outside
 
 class Filter:
     # every methode in this class will be applied to the the results
@@ -23,7 +24,7 @@ class Filter:
         return merged_results
 
     # parameters for get_good_games
-    # todo make configureable via gui
+
     min_reviews = 10
     min_positive = 40
 

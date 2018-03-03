@@ -8,9 +8,18 @@ from steam_scraper.main import run_scrape
 
 results, keys = run_scrape(True)
 
+served_subdir = "served"
+
+#todo make filter configureable
+#todo make all the names a lot nicer
+
 json_output = {}
 json_output["timestamp"] = str(datetime.datetime.now())
-json_output["filter settings"] = {}#todo
+json_output["filter settings"] = {
+    "minimum_discount": 40,
+    "min_reviews": 10,
+    "min_positive": 40
+}
 json_output["items"] = []
 
 for i in range(len(results)):
@@ -22,7 +31,7 @@ for i in range(len(results)):
 
     json_output["items"].append(item)
 
-with open(ROOTDIR + dir_sep + "steamsale_data.json", "w", encoding='UTF-8') as json_file:
+with open(ROOTDIR + dir_sep + served_subdir + dir_sep + "steamsale_data.json", "w", encoding='UTF-8') as json_file:
     json_file.write(json.dumps(json_output, indent=4))
 
 
