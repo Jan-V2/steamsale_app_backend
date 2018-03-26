@@ -3,7 +3,7 @@ import socketserver
 import os
 from my_utils.platform_vars import *
 
-PORT = 8002
+PORT = 8000
 
 os.chdir(ROOTDIR + dir_sep + "served")
 Handler = http.server.SimpleHTTPRequestHandler

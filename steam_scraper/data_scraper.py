@@ -2,7 +2,6 @@ import collections
 from my_utils.my_logging import log_message as log
 from my_utils.consts import ints_str_list as ints_str
 
-#todo add url scrapeing
 
 class Data_Scraper:
     # todo make it more elegant by using map rather than having a for loop in each method

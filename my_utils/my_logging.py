@@ -5,7 +5,7 @@ from my_utils.platform_vars import ROOTDIR, dir_sep
 
 # todo make this use json and make a gui tool for filtering and viewing logfiles
 
-logfile_name = ""
+logfile_name = "log"
 
 
 
@@ -38,3 +38,7 @@ def get_timestamp():
 def set_logfile_name(name):
     global logfile_name
     logfile_name = name
+
+def log_and_raise_exept(logline):
+    log_exept(logline)
+    raise Exception(logline)
