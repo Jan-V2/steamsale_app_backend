@@ -6,7 +6,7 @@ from my_utils.platform_vars import ROOTDIR, dir_sep
 from steam_scraper.main import run_scrape
 
 if __name__ == '__main__':
-    results, keys = run_scrape(True)
+    results, keys = run_scrape(is_test=True)
 
     served_subdir = "served"
 
@@ -34,7 +34,7 @@ if __name__ == '__main__':
     with open(ROOTDIR + dir_sep + served_subdir + dir_sep + "steamsale_data.json", "w", encoding='UTF-8') as json_file:
         json_file.write(json.dumps(json_output, indent=4))
 
-    print("done")
+    print("done dumping json")
 
 else:
     print("This file must be run as main.")

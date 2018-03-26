@@ -1,7 +1,5 @@
 # -*- coding: utf-8 -*-
 import collections
-import string
-from pprint import pprint
 
 import bs4
 import urllib3
