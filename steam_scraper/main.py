@@ -12,21 +12,25 @@ from steam_scraper.data_scraper import Data_Scraper
 
 steam_special_url_firstpage = "http://store.steampowered.com/search/?specials=1"
 and_page = "&page="
-http = urllib3.PoolManager()
 
 html_file = "test.html"
 
 
-def run_scrape(is_test):
+def run_scrape(is_test, proxy=None):
     log("running scrape")
+    if proxy is None:
+        http = urllib3.PoolManager()
+    else:
+        http = urllib3.ProxyManager(proxy_url=proxy)
+
     results_as_strs = []
     if is_test:
         num_pages = 3
     else:
         num_pages = get_number_pages()
     data_scraper = Data_Scraper()
-    for i in range(1, num_pages+1):
-        page_results_as_bs4 = get_results_from_page_n(i)
+    for i in range(1,  num_pages+1):
+        page_results_as_bs4 = get_results_from_page_n(i, http)
         log("got page " + str(i) + "/" + str(num_pages))
         apply_data_scraping(page_results_as_bs4, data_scraper)
 
@@ -59,12 +63,14 @@ def apply_filters(scraped_dict):
     return merged_results, keys
 
 
-def get_results_from_page_n(page_n):
+def get_results_from_page_n(page_n, http):
     page_results = []
     if page_n == 1:  # page 1 is special because it has no &page=n
-        page = bs4.BeautifulSoup(http.request("GET", steam_special_url_firstpage).data, 'html.parser')
+        url =  steam_special_url_firstpage
     else:
-        page = bs4.BeautifulSoup(http.request("GET", steam_special_url_firstpage + and_page + str(page_n)).data, 'html.parser')
+        url = steam_special_url_firstpage + and_page + str(page_n)
+
+    page = bs4.BeautifulSoup(http.request("GET", url).data, 'html.parser')
 
     i = page.find_all("a", {"class": "search_result_row"})
     for result in i:
@@ -106,6 +112,6 @@ def get_number_pages():
 
 # todo i could make this more effecient by doing basic data scrape -> filter -> rest of datascraping
 if __name__ == '__main__':
-    # ui = Gui()
-    # ui.open()
-    run_scrape(True)
+    from pprint import pprint
+    #pprint(run_scrape(True, "http://13.231.152.169:3128"))
+    pprint(run_scrape(True, None))

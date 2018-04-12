@@ -10,6 +10,8 @@ class Data_Scraper:
     # a list in which each result lines up with a result from the argument
     # like this ["review_scores": [list of review scores]]
     scraped_dict = collections.defaultdict(list)
+    curr_symbol = None# this is super inelegant
+    curr_symbol_list = "¥$€£"
 
     def get_user_reviews(self, results):
         # returns 2 lists
@@ -78,18 +80,30 @@ class Data_Scraper:
 
     def get_old_and_new_price(self, results_list):
         log('scraping the old+new price')
+
         for result in results_list:
             if result.find('div', {'class': 'col search_price discounted responsive_secondrow'}) is not None:
                 price_str = str(result.find('div', {'class': 'col search_price discounted responsive_secondrow'}).text)
-                price_str = price_str[:price_str.rfind('€')] # cuts of € and the spaces that come after it at the end of the string so you can split it cleanly
+                price_str = price_str.replace('\t', '')
                 price_str = price_str.replace('\n', '')# there is apperently a return at the start of the string
                 price_str = price_str.replace(',', '.')
                 price_str = price_str.replace('--', '0')# if a price has no decimal places it apperently adds --
-                old_new_str = price_str.split('€')
 
-                self.scraped_dict["old_price"].append(float(old_new_str[0]))
-                if len(old_new_str) > 1:
-                    self.scraped_dict["new_price"].append(float(old_new_str[1]))
+                if self.curr_symbol is None:
+                    for sym in self.curr_symbol_list:
+                        if sym in price_str:
+                            self.curr_symbol = sym
+                            break
+
+                old_new_strs = price_str.split(self.curr_symbol)
+                if old_new_strs[0] == "":# first or last item is empty
+                    old_new_strs = old_new_strs[1:]
+                else:
+                    old_new_strs = old_new_strs[:2]
+
+                self.scraped_dict["old_price"].append(float(old_new_strs[0]))
+                if len(old_new_strs) > 1:
+                    self.scraped_dict["new_price"].append(float(old_new_strs[1]))
                 else:
                     self.scraped_dict["new_price"].append(float(0))
             else:
