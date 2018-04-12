@@ -28,7 +28,7 @@ def test_proxy(proxy):
     return cont
 
 
-def do_scrape(path, proxy = None):
+def do_scrape(path, proxy=None):
     results, keys = run_scrape(is_test=is_test, proxy=proxy)
 
     served_subdir = "served"
@@ -100,12 +100,11 @@ def main():
             s3 = boto3.resource("s3")
             s3.meta.client.upload_file(path, bucket_name, region + ".json")
 
-
     region_name = regions["proxyless"]
     path = ROOTDIR + dir_sep + "served" + dir_sep + region_name + ".json"
     do_scrape(path)
     s3 = boto3.resource("s3")
-    s3.meta.client.upload_file(path, bucket_name, path)
+    s3.meta.client.upload_file(path, bucket_name, region_name + ".json")
 
 
 if __name__ == '__main__':
