@@ -85,6 +85,7 @@ class Data_Scraper:
             if result.find('div', {'class': 'col search_price discounted responsive_secondrow'}) is not None:
                 price_str = str(result.find('div', {'class': 'col search_price discounted responsive_secondrow'}).text)
                 price_str = price_str.replace('\t', '')
+                price_str = price_str.replace("Free", "")# sloppy fix to a bug
                 price_str = price_str.replace('\n', '')# there is apperently a return at the start of the string
                 price_str = price_str.replace(',', '.')
                 price_str = price_str.replace('--', '0')# if a price has no decimal places it apperently adds --

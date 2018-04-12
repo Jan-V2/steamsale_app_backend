@@ -27,7 +27,7 @@ def run_scrape(is_test, proxy=None):
     if is_test:
         num_pages = 3
     else:
-        num_pages = get_number_pages()
+        num_pages = get_number_pages(http)
     data_scraper = Data_Scraper()
     for i in range(1,  num_pages+1):
         page_results_as_bs4 = get_results_from_page_n(i, http)
@@ -87,7 +87,7 @@ def get_result_list(pages):
         i.clear()
     return results
 
-def get_number_pages():
+def get_number_pages(http):
     first_page = http.request("GET", steam_special_url_firstpage)
     html_soup = bs4.BeautifulSoup(first_page.data, 'html.parser')
 
