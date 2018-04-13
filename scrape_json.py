@@ -7,7 +7,10 @@ from my_utils.my_logging import log_error, log_return, log_warning, log_message 
 from my_utils.platform_vars import ROOTDIR, dir_sep
 from steam_scraper.main import run_scrape, steam_special_url_firstpage
 
-is_test = True
+is_test = False
+log_return()
+proxy_port = 3128
+bucket_name = "steamfilterapp"
 
 def get_proxy_instance(ec2):
     resp = ec2.describe_instances()
@@ -54,9 +57,6 @@ def do_scrape(path, proxy=None):
         json_file.write(json.dumps(json_output, indent=4))
 
     log("done dumping json")
-
-proxy_port = 3128
-bucket_name = "steamfilterapp"
 
 
 def main():

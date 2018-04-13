@@ -91,22 +91,9 @@ def get_number_pages(http):
     first_page = http.request("GET", steam_special_url_firstpage)
     html_soup = bs4.BeautifulSoup(first_page.data, 'html.parser')
 
-    result = html_soup.find_all("div", {"class": "search_pagination_right"})
-    result = str(result)
-
-    searchstring = 'page='
-    pagelist = [m.start() for m in re.finditer(searchstring, result)]
-
-    # it assumes that the 2nd to last result is the total number of pages
-    index = pagelist[len(pagelist) - 2] + len(searchstring)
-    # this code
-    i = 0
-    page_number = ""
-    while result[index + i] != "\"":
-        page_number += result[index + i]
-        i += 1
-
-    return int(page_number)
+    result = html_soup.find("div", {"class": "search_pagination_right"})
+    pages = result.find_all("a")[2].getText()
+    return int(pages)
 
 
 
