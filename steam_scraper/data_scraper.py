@@ -108,8 +108,6 @@ class Data_Scraper:
                 if self.curr_symbol is None:
                     set_curr_symbol(price_str)
 
-                print(price_str)
-
                 price_str = price_str.replace('\t', '')
                 price_str = price_str.replace("Free", self.curr_symbol + "0" + self.curr_symbol)# sloppy fix to a bug
                 price_str = price_str.replace('\n', '')# there is apperently a return at the start of the string
@@ -124,8 +122,6 @@ class Data_Scraper:
                     old_new_strs = old_new_strs[:2]
 
                 old_new_strs = clean_extra_dots(old_new_strs)
-
-                pprint(old_new_strs)
 
                 self.scraped_dict["old_price"].append(float(old_new_strs[0]))
                 if len(old_new_strs) > 1:
