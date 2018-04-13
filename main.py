@@ -106,13 +106,13 @@ def run():
     # todo there is a bug in the scraper, because way to many doubles are removed
 
     regions = {
-        "proxyless": [{"eu-central-1": "eu"}]
+        "proxyless": [{"eu-central-1": "EU"}]
         ,
         "proxied": [
-            {"ap-northeast-1": "japan"},
-            {"eu-west-2": "uk"},
-            {"us-east-1": "usa"},
-            {"ap-southeast-2": "aus"}
+            {"ap-northeast-1": "Japan"},
+            {"eu-west-2": "UK"},
+            {"us-east-1": "USA"},
+            {"ap-southeast-2": "Australia"}
         ]
     }
 
