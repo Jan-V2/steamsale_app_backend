@@ -95,18 +95,23 @@ class Data_Scraper:
                     log("cleaned multible dots. is now {}".format(_price_strs[i]))
             return _price_strs
 
+        def set_curr_symbol(_price_str):
+            for sym in self.curr_symbol_list:
+                if sym in _price_str:
+                    self.curr_symbol = sym
+                    break
+
         for result in results_list:
             if result.find('div', {'class': 'col search_price discounted responsive_secondrow'}) is not None:
                 price_str = str(result.find('div', {'class': 'col search_price discounted responsive_secondrow'}).text)
 
                 if self.curr_symbol is None:
-                    for sym in self.curr_symbol_list:
-                        if sym in price_str:
-                            self.curr_symbol = sym
-                            break
+                    set_curr_symbol(price_str)
+
+                print(price_str)
 
                 price_str = price_str.replace('\t', '')
-                price_str = price_str.replace("Free", "0" + self.curr_symbol)# sloppy fix to a bug
+                price_str = price_str.replace("Free", self.curr_symbol + "0" + self.curr_symbol)# sloppy fix to a bug
                 price_str = price_str.replace('\n', '')# there is apperently a return at the start of the string
                 price_str = price_str.replace(',', '.')
                 price_str = price_str.replace('--', '0')# if a price has no decimal places it apperently adds --
@@ -115,10 +120,12 @@ class Data_Scraper:
 
                 if old_new_strs[0] == "":# first or last item is empty
                     old_new_strs = old_new_strs[1:]
-                else:
+                if len(old_new_strs) > 2:
                     old_new_strs = old_new_strs[:2]
 
                 old_new_strs = clean_extra_dots(old_new_strs)
+
+                pprint(old_new_strs)
 
                 self.scraped_dict["old_price"].append(float(old_new_strs[0]))
                 if len(old_new_strs) > 1:
