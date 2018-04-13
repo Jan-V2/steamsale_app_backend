@@ -104,15 +104,23 @@ class Data_Scraper:
         for result in results_list:
             if result.find('div', {'class': 'col search_price discounted responsive_secondrow'}) is not None:
                 price_str = str(result.find('div', {'class': 'col search_price discounted responsive_secondrow'}).text)
+                cont = result.find('div', {'class': 'col search_price discounted responsive_secondrow'})
+                t1 = cont.find("strike").text
+                t2 = cont.text.replace(t1, "")
 
                 if self.curr_symbol is None:
                     set_curr_symbol(price_str)
 
                 price_str = price_str.replace('\t', '')
-                price_str = price_str.replace("Free", self.curr_symbol + "0" + self.curr_symbol)# sloppy fix to a bug
-                price_str = price_str.replace('\n', '')# there is apperently a return at the start of the string
+                price_str = price_str.replace('\n', '')  # there is apperently a return at the start of the string
                 price_str = price_str.replace(',', '.')
-                price_str = price_str.replace('--', '0')# if a price has no decimal places it apperently adds --
+                price_str = price_str.replace('--', '0')  # if a price has no decimal places it apperently adds --
+
+                if "Free" in price_str:
+                    if price_str[0] is self.curr_symbol:
+                        price_str = price_str.replace("Free", self.curr_symbol + "0")
+                    else:
+                        price_str = price_str.replace("Free", "0" + self.curr_symbol)
 
                 old_new_strs = price_str.split(self.curr_symbol)
 

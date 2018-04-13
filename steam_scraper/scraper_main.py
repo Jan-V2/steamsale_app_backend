@@ -29,13 +29,14 @@ def run_scrape(is_test, proxy=None):
     else:
         num_pages = get_number_pages(http)
     data_scraper = Data_Scraper()
+    data_scraper.scraped_dict = collections.defaultdict(list)# seems to not gc this between runs
 
     # for testing
     # i = 1
     # page_results_as_bs4 = get_results_from_page_n(i, http)
     # log("got page " + str(i) + "/" + str(num_pages))
     # apply_data_scraping(page_results_as_bs4, data_scraper)
-    # i = 30
+    # i = 28
     # page_results_as_bs4 = get_results_from_page_n(i, http)
     # log("got page " + str(i) + "/" + str(num_pages))
     # apply_data_scraping(page_results_as_bs4, data_scraper)
