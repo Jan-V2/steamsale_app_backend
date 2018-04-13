@@ -1,4 +1,6 @@
 import collections
+from pprint import pprint
+
 from my_utils.my_logging import log_message as log
 from my_utils.consts import ints_str_list as ints_str
 import re
@@ -96,17 +98,18 @@ class Data_Scraper:
         for result in results_list:
             if result.find('div', {'class': 'col search_price discounted responsive_secondrow'}) is not None:
                 price_str = str(result.find('div', {'class': 'col search_price discounted responsive_secondrow'}).text)
-                price_str = price_str.replace('\t', '')
-                price_str = price_str.replace("Free", "")# sloppy fix to a bug
-                price_str = price_str.replace('\n', '')# there is apperently a return at the start of the string
-                price_str = price_str.replace(',', '.')
-                price_str = price_str.replace('--', '0')# if a price has no decimal places it apperently adds --
 
                 if self.curr_symbol is None:
                     for sym in self.curr_symbol_list:
                         if sym in price_str:
                             self.curr_symbol = sym
                             break
+
+                price_str = price_str.replace('\t', '')
+                price_str = price_str.replace("Free", "0" + self.curr_symbol)# sloppy fix to a bug
+                price_str = price_str.replace('\n', '')# there is apperently a return at the start of the string
+                price_str = price_str.replace(',', '.')
+                price_str = price_str.replace('--', '0')# if a price has no decimal places it apperently adds --
 
                 old_new_strs = price_str.split(self.curr_symbol)
 

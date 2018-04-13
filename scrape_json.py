@@ -63,6 +63,7 @@ def main():
     # todo make filter configureable
     # todo make all the names a lot nicer
     # todo add commandline options
+    # todo add much more logging
 
     regions = {
         "proxyless":  "eu-central-1"
@@ -95,6 +96,7 @@ def main():
             proxy_ip = inst["PublicIpAddress"]
             proxy = "http://{}:{}".format(proxy_ip, proxy_port)
             path = ROOTDIR + dir_sep + "served" + dir_sep + region + ".json"
+            log("scrapeing {}".format(region))
             do_scrape(path, proxy)
             ec2.stop_instances(InstanceIds=[inst_id])
             s3 = boto3.resource("s3")
@@ -102,6 +104,7 @@ def main():
 
     region_name = regions["proxyless"]
     path = ROOTDIR + dir_sep + "served" + dir_sep + region_name + ".json"
+    log("scrapeing {}".format(region_name))
     do_scrape(path)
     s3 = boto3.resource("s3")
     s3.meta.client.upload_file(path, bucket_name, region_name + ".json")
