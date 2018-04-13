@@ -1,12 +1,14 @@
 import datetime
 import json
+import traceback
+
 import boto3
 import time
 import urllib3
 from my_utils.my_logging import log_error, log_return, log_warning, log_message as log
 from my_utils.platform_vars import ROOTDIR, dir_sep
 from steam_scraper.main import run_scrape, steam_special_url_firstpage
-
+from pprint import pformat
 is_test = False
 log_return()
 proxy_port = 3128
@@ -59,14 +61,14 @@ def do_scrape(path, proxy=None):
     log("done dumping json")
 
 
-def main():
+def run():
     # todo make filter configureable
     # todo make all the names a lot nicer
     # todo add commandline options
     # todo add much more logging
 
     regions = {
-        "proxyless":  "eu-central-1"
+        "proxyless": "eu-central-1"
         ,
         "proxied": [
             "ap-northeast-1",
@@ -108,6 +110,17 @@ def main():
     do_scrape(path)
     s3 = boto3.resource("s3")
     s3.meta.client.upload_file(path, bucket_name, region_name + ".json")
+
+
+def main():
+    try:
+        log_return()
+        log("starting")
+        run()
+    except Exception as e:
+        log_error(traceback.format_exc())
+        log_error(pformat(traceback.format_stack()))
+        raise e
 
 
 if __name__ == '__main__':
