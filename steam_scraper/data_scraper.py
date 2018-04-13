@@ -1,6 +1,9 @@
 import collections
+from pprint import pprint
+
 from my_utils.my_logging import log_message as log
 from my_utils.consts import ints_str_list as ints_str
+import re
 
 
 class Data_Scraper:
@@ -81,6 +84,17 @@ class Data_Scraper:
     def get_old_and_new_price(self, results_list):
         log('scraping the old+new price')
 
+        def clean_extra_dots(_price_strs):
+            # to deal with prices higher that 1000
+            for i in range(len(_price_strs)):
+                dots_idx = [m.start() for m in re.finditer("\.", _price_strs[i])]
+                if len(dots_idx) > 1:
+                    log("found multible dots in price {}".format(_price_strs[i]))
+                    for dot_idx in reversed(dots_idx[:len(dots_idx) - 1]):
+                        _price_strs[i] = _price_strs[i][:dot_idx] + _price_strs[i][dot_idx+1:]
+                    log("cleaned multible dots. is now {}".format(_price_strs[i]))
+            return _price_strs
+
         for result in results_list:
             if result.find('div', {'class': 'col search_price discounted responsive_secondrow'}) is not None:
                 price_str = str(result.find('div', {'class': 'col search_price discounted responsive_secondrow'}).text)
@@ -97,10 +111,13 @@ class Data_Scraper:
                             break
 
                 old_new_strs = price_str.split(self.curr_symbol)
+
                 if old_new_strs[0] == "":# first or last item is empty
                     old_new_strs = old_new_strs[1:]
                 else:
                     old_new_strs = old_new_strs[:2]
+
+                old_new_strs = clean_extra_dots(old_new_strs)
 
                 self.scraped_dict["old_price"].append(float(old_new_strs[0]))
                 if len(old_new_strs) > 1:
