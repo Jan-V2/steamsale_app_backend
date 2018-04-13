@@ -67,6 +67,7 @@ def run():
     # todo add commandline options
     # todo add much more logging
 
+
     regions = {
         "proxyless": "eu-central-1"
         ,
