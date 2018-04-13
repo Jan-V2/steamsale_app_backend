@@ -1,7 +1,7 @@
 import collections
 from pprint import pprint
 
-from my_utils.my_logging import log_message as log
+from my_utils.my_logging import log_message as log, log_warning
 from my_utils.consts import ints_str_list as ints_str
 import re
 
@@ -13,7 +13,7 @@ class Data_Scraper:
     # a list in which each result lines up with a result from the argument
     # like this ["review_scores": [list of review scores]]
     scraped_dict = collections.defaultdict(list)
-    curr_symbol = None# this is super inelegant
+    curr_symbol = None  # this is super inelegant
     curr_symbol_list = "¥$€£"
 
     def get_user_reviews(self, results):
@@ -84,17 +84,6 @@ class Data_Scraper:
     def get_old_and_new_price(self, results_list):
         log('scraping the old+new price')
 
-        def clean_extra_dots(_price_strs):
-            # to deal with prices higher that 1000
-            for i in range(len(_price_strs)):
-                dots_idx = [m.start() for m in re.finditer("\.", _price_strs[i])]
-                if len(dots_idx) > 1:
-                    log("found multible dots in price {}".format(_price_strs[i]))
-                    for dot_idx in reversed(dots_idx[:len(dots_idx) - 1]):
-                        _price_strs[i] = _price_strs[i][:dot_idx] + _price_strs[i][dot_idx+1:]
-                    log("cleaned multible dots. is now {}".format(_price_strs[i]))
-            return _price_strs
-
         def set_curr_symbol(_price_str):
             for sym in self.curr_symbol_list:
                 if sym in _price_str:
@@ -102,51 +91,53 @@ class Data_Scraper:
                     break
 
         for result in results_list:
-            if result.find('div', {'class': 'col search_price discounted responsive_secondrow'}) is not None:
-                price_str = str(result.find('div', {'class': 'col search_price discounted responsive_secondrow'}).text)
-                cont = result.find('div', {'class': 'col search_price discounted responsive_secondrow'})
-                t1 = cont.find("strike").text
-                t2 = cont.text.replace(t1, "")
+            cont = result.find('div', {'class': 'col search_price discounted responsive_secondrow'})
+            if cont is not None:
+                old_price = cont.find("strike").text
+                new_price = cont.text.replace(old_price, "")
 
                 if self.curr_symbol is None:
-                    set_curr_symbol(price_str)
+                    set_curr_symbol(old_price)
 
-                price_str = price_str.replace('\t', '')
-                price_str = price_str.replace('\n', '')  # there is apperently a return at the start of the string
-                price_str = price_str.replace(',', '.')
-                price_str = price_str.replace('--', '0')  # if a price has no decimal places it apperently adds --
+                new_price = new_price.replace('\t', '') \
+                    .replace('\n', '') \
 
-                if "Free" in price_str:
-                    if price_str[0] is self.curr_symbol:
-                        price_str = price_str.replace("Free", self.curr_symbol + "0")
-                    else:
-                        price_str = price_str.replace("Free", "0" + self.curr_symbol)
+                def clean(str):
+                    def clean_extra_dots(_str):
+                        # to deal with prices higher that 1000
+                        dots_idx = [m.start() for m in re.finditer("\.", _str)]
+                        if len(dots_idx) > 1:
+                            log("found multible dots in price {}".format(_str))
+                            for dot_idx in reversed(dots_idx[:len(dots_idx) - 1]):
+                                _str = _str[:dot_idx] + _str[dot_idx + 1:]
+                            log("cleaned multible dots. is now {}".format(_str))
+                        return _str
+                    return clean_extra_dots(
+                        str.replace(',', '.')
+                          .replace(self.curr_symbol, "")
+                             .replace('--', '0')  # if a price has no decimal places it apparently adds --
+                    )
 
-                old_new_strs = price_str.split(self.curr_symbol)
+                new_price = clean(new_price)
+                old_price = clean(old_price)
+                if "Free" in new_price:
+                    new_price = 0
 
-                if old_new_strs[0] == "":# first or last item is empty
-                    old_new_strs = old_new_strs[1:]
-                if len(old_new_strs) > 2:
-                    old_new_strs = old_new_strs[:2]
+                self.scraped_dict["old_price"].append(float(old_price))
+                self.scraped_dict["new_price"].append(float(new_price))
 
-                old_new_strs = clean_extra_dots(old_new_strs)
-
-                self.scraped_dict["old_price"].append(float(old_new_strs[0]))
-                if len(old_new_strs) > 1:
-                    self.scraped_dict["new_price"].append(float(old_new_strs[1]))
-                else:
-                    self.scraped_dict["new_price"].append(float(0))
             else:
+                log_warning("could not find price container, probably because the items isn't discounted. appending 0s")
                 self.scraped_dict["old_price"].append(float(0))
                 self.scraped_dict["new_price"].append(float(0))
 
     def get_app_id(self, results_list):
-        # THE APP ID(S) ARE STRORED AS STRINGS FOR NOW since i don't need them as ints right now.
-        # nor can i think of a reason why i should want that.
+        # THE APP ID(S) ARE STORED AS STRINGS FOR NOW since i don't need them as ints right now.
+        # nor can i think of a reason why i should want to.
         log("scraping appids")
         for result in results_list:
             try:
-                if(',' in result['data-ds-appid']):# if it has multible appids which is when it's an old style bundle
+                if (',' in result['data-ds-appid']):  # if it has multible appids which is when it's an old style bundle
                     self.scraped_dict["appids"].append(
                         result['data-ds-packageid'])
                     self.scraped_dict["is_bundle"].append(True)
@@ -170,4 +161,3 @@ class Data_Scraper:
     #     for result in results_list:
     #         thumbnail = result.find('div', {'class': 'col search_capsule'}).find("img")["src"]
     #         self.scraped_dict["thumbnail"].append(thumbnail)
-
