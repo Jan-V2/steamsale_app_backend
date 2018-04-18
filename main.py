@@ -109,13 +109,15 @@ def run():
 
 
     regions = {
-        "proxyless": [{"eu-central-1": "EU"}]
+        "proxyless": [
+            # {"eu-central-1": "EU"}
+        ]
         ,
         "proxied": [
-            {"ap-northeast-1": "Japan"},
-            {"eu-west-2": "UK"},
+            # {"ap-northeast-1": "Japan"},
+            # {"eu-west-2": "UK"},
             {"us-east-1": "USA"},
-            {"ap-southeast-2": "Australia"}
+            # {"ap-southeast-2": "Australia"}
         ]
     }
 

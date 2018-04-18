@@ -159,6 +159,8 @@ class Data_Scraper:
                 # The url for the thumbnail.
                 url = result.find("div", {"class": "search_capsule"}).find("img")["src"]
                 cdn_id = re.search("/(\w+)/capsule", url).group(1)
+                if cdn_id is None:
+                    raise TypeError("could not find img_id in {}".format(url))
                 self.scraped_dict["new_cdn_id"].append(cdn_id)
 
     # def get_href(self, results_list):
