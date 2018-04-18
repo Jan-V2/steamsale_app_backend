@@ -1,18 +1,23 @@
 import datetime
 import json
+import re
 import traceback
-
+from zipfile import ZipFile, ZIP_LZMA
 import boto3
 import time
-import urllib3
+from os import listdir, chdir
+from os.path import isfile, join
 from my_utils.my_logging import log_error, log_return, log_warning, log_message as log
 from my_utils.platform_vars import ROOTDIR, dir_sep
 from steam_scraper.scraper_main import run_scrape, steam_special_url_firstpage
-from pprint import pformat
+from pprint import pformat, pprint
+
 is_test = False
 log_return()
 proxy_port = 3128
 bucket_name = "steamfilterapp"
+downloaded_dir = ROOTDIR + dir_sep + "downloaded" + dir_sep
+zipfile_name = "data.zip"
 
 # def test_proxy(proxy): not currently in use
 #     cont = False
@@ -53,7 +58,7 @@ def do_scrape(region_dict, use_proxy=False):
             inst_id = inst["InstanceId"]
             tries = 5
             while inst["State"]["Name"] != "running" and tries > 0:
-                log("instance not running in {}. starting now. {} tries left.".format(aws_region, tries))
+                log("proxy not running in {}. starting now. {} tries left.".format(aws_region, tries))
                 ec2.start_instances(InstanceIds=[inst_id])
                 time.sleep(45)
                 inst = get_proxy_instance(ec2)
@@ -71,8 +76,7 @@ def do_scrape(region_dict, use_proxy=False):
 
 
 def format_and_save_results(results, keys, region_name):
-    served_subdir = "served"
-    path = ROOTDIR + dir_sep + "served" + dir_sep + region_name + ".json"
+    path = downloaded_dir + region_name + ".json"
 
     json_output = {
         "timestamp": str(datetime.datetime.now()),
@@ -93,17 +97,14 @@ def format_and_save_results(results, keys, region_name):
         json_file.write(json.dumps(json_output, indent=4))
 
     log("done saving json to disk")
-    log("saving to s3")
-    s3 = boto3.resource("s3")
-    s3.meta.client.upload_file(path, bucket_name, region_name + ".json")
+
 
 
 def run():
     # todo make filter configureable
     # todo make all the names a lot nicer
     # todo add commandline options
-    # todo add much more logging
-    # todo there is a bug in the scraper, because way to many doubles are removed
+
 
     regions = {
         "proxyless": [{"eu-central-1": "EU"}]
@@ -122,11 +123,43 @@ def run():
         do_scrape(region_dict)
 
 
+def clear_downloaded_dir():
+    import os
+    folder = downloaded_dir
+    for the_file in os.listdir(folder):
+        file_path = os.path.join(folder, the_file)
+        try:
+            if os.path.isfile(file_path):
+                os.unlink(file_path)
+        except Exception as e:
+            print(e)
+
+
+def compress_to_zip_and_upload():
+    files = [f for f in listdir(downloaded_dir) if isfile(join(downloaded_dir, f))]
+
+    def json_filter(file_name):
+        regex = re.compile(".*\.json$")
+        res = regex.match(file_name) is not None
+        return res
+    files = list(filter(json_filter, files))
+    chdir(downloaded_dir)
+    with ZipFile(downloaded_dir + zipfile_name, mode="w", compression=ZIP_LZMA) as zip:
+        for file in files:
+            zip.write(file)
+    chdir(ROOTDIR)
+    log("saving to s3")
+    s3 = boto3.resource("s3")
+    s3.meta.client.upload_file(downloaded_dir + zipfile_name, bucket_name, zipfile_name)
+
 def main():
     try:
         log_return()
         log("starting")
+        clear_downloaded_dir()
         run()
+        compress_to_zip_and_upload()
+
     except Exception as e:
         log_error(traceback.format_exc())
         log_error(pformat(traceback.format_stack()))
@@ -137,3 +170,5 @@ if __name__ == '__main__':
     main()
 else:
     print("This file must be run as main.")
+
+
