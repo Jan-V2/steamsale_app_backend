@@ -142,16 +142,24 @@ class Data_Scraper:
                         result['data-ds-packageid'])
                     self.scraped_dict["is_bundle"].append(True)
                     self.scraped_dict["is_old_bundle"].append(True)
+                    self.scraped_dict["new_cdn_id"].append("")
+
                 else:
                     self.scraped_dict["appids"].append(
                         result['data-ds-appid'])
                     self.scraped_dict["is_bundle"].append(False)
                     self.scraped_dict["is_old_bundle"].append(False)
+                    self.scraped_dict["new_cdn_id"].append("")
             except KeyError:
                 self.scraped_dict["appids"].append(
                     result['data-ds-bundleid'])
                 self.scraped_dict["is_bundle"].append(True)
                 self.scraped_dict["is_old_bundle"].append(False)
+
+                # The url for the thumbnail.
+                url = result.find("div", {"class": "search_capsule"}).find("img")["src"]
+                cdn_id = re.search("/(\w+)/capsule", url).group(1)
+                self.scraped_dict["new_cdn_id"].append(cdn_id)
 
     # def get_href(self, results_list):
     #     for result in results_list:

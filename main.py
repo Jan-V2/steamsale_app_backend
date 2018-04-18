@@ -105,6 +105,8 @@ def run():
     # todo make all the names a lot nicer
     # todo add commandline options
 
+    # todo scrape special url where nessarry
+
 
     regions = {
         "proxyless": [{"eu-central-1": "EU"}]
