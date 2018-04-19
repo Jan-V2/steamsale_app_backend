@@ -2,15 +2,15 @@ import datetime
 import json
 import re
 import traceback
-from zipfile import ZipFile, ZIP_LZMA
+from zipfile import ZipFile, ZIP_DEFLATED
 import boto3
 import time
 from os import listdir, chdir
 from os.path import isfile, join
 from my_utils.my_logging import log_error, log_return, log_warning, log_message as log
 from my_utils.platform_vars import ROOTDIR, dir_sep
-from steam_scraper.scraper_main import run_scrape, steam_special_url_firstpage
-from pprint import pformat, pprint
+from steam_scraper.scraper_main import run_scrape
+from pprint import pformat
 
 is_test = False
 log_return()
@@ -99,14 +99,10 @@ def format_and_save_results(results, keys, region_name):
     log("done saving json to disk")
 
 
-
 def run():
-    # todo make filter configureable
+    # todo make filter configurable from the outside.
     # todo make all the names a lot nicer
     # todo add commandline options
-
-    # todo scrape special url where nessarry
-
 
     regions = {
         "proxyless": [
@@ -148,7 +144,7 @@ def compress_to_zip_and_upload():
         return res
     files = list(filter(json_filter, files))
     chdir(downloaded_dir)
-    with ZipFile(downloaded_dir + zipfile_name, mode="w", compression=ZIP_LZMA) as zip:
+    with ZipFile(downloaded_dir + zipfile_name, mode="w", compression=ZIP_DEFLATED) as zip:
         for file in files:
             zip.write(file)
     chdir(ROOTDIR)
