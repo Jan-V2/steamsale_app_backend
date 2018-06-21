@@ -2,6 +2,7 @@ import collections
 from pprint import pprint
 
 from my_utils.my_logging import log_message as log, log_warning
+from steam_scraper.scraper_main import verbose
 from my_utils.consts import ints_str_list as ints_str
 import re
 
@@ -23,7 +24,8 @@ class Data_Scraper:
         n_user_reviews = []
         percent_reviews_positive = []
         found = 0
-        log("scraping reviews")
+        if verbose:
+            log("scraping reviews")
         for result in results:
             var = result.find("span", {"class": "search_review_summary"})
             if not isinstance(var, type(None)):  # if true it contains a review
@@ -59,7 +61,8 @@ class Data_Scraper:
             self.scraped_dict['percent_reviews_positive'].append(percent_reviews_positive[i])
 
     def get_discount_percents(self, results_list):
-        log('scraping discount percents')
+        if verbose:
+            log('scraping discount percents')
         discount_percents = []
         for r in results_list:
             string = str(r.find("div", {"class": "col search_discount responsive_secondrow"}))
@@ -76,19 +79,28 @@ class Data_Scraper:
             self.scraped_dict["discount_percents"].append(item)
 
     def get_titles_list(self, results_list):
-        log("scraping title")
+        if verbose:
+            log("scraping title")
         for result in results_list:
             self.scraped_dict["titles"].append(
                 str(result.find("span", {"class": "title"}).string))
 
     def get_old_and_new_price(self, results_list):
-        log('scraping the old+new price')
+        if verbose:
+            log('scraping the old+new price')
 
         def set_curr_symbol(_price_str):
             for sym in self.curr_symbol_list:
                 if sym in _price_str:
                     self.curr_symbol = sym
                     break
+
+        def save_to_float(_str):
+            _str = re.sub("\D", "", _str)
+            if _str == "":
+                return float(0)
+            else:
+                return float(_str)
 
         for result in results_list:
             cont = result.find('div', {'class': 'col search_price discounted responsive_secondrow'})
@@ -102,18 +114,21 @@ class Data_Scraper:
                 new_price = new_price.replace('\t', '') \
                     .replace('\n', '') \
 
-                def clean(str):
-                    def clean_extra_dots(_str):
+
+                def clean(_str):
+
+                    def clean_extra_dots(__str):
                         # to deal with prices higher that 1000
-                        dots_idx = [m.start() for m in re.finditer("\.", _str)]
+                        dots_idx = [m.start() for m in re.finditer("\.", __str)]
                         if len(dots_idx) > 1:
-                            log("found multible dots in price {}".format(_str))
+                            log("found multible dots in price {}".format(__str))
                             for dot_idx in reversed(dots_idx[:len(dots_idx) - 1]):
-                                _str = _str[:dot_idx] + _str[dot_idx + 1:]
-                            log("cleaned multible dots. is now {}".format(_str))
-                        return _str
+                                __str = __str[:dot_idx] + __str[dot_idx + 1:]
+                            log("cleaned multible dots. is now {}".format(__str))
+                        return __str
+
                     return clean_extra_dots(
-                        str.replace(',', '.')
+                        _str.replace(',', '.')
                           .replace(self.curr_symbol, "")
                              .replace('--', '0')  # if a price has no decimal places it apparently adds --
                     )
@@ -123,8 +138,8 @@ class Data_Scraper:
                 if "Free" in new_price:
                     new_price = 0
 
-                self.scraped_dict["old_price"].append(float(old_price))
-                self.scraped_dict["new_price"].append(float(new_price))
+                self.scraped_dict["old_price"].append(save_to_float(old_price))
+                self.scraped_dict["new_price"].append(save_to_float(new_price))
 
             else:
                 log_warning("could not find price container, probably because the items isn't discounted. appending 0s")
@@ -134,7 +149,8 @@ class Data_Scraper:
     def get_app_id(self, results_list):
         # THE APP ID(S) ARE STORED AS STRINGS FOR NOW since i don't need them as ints right now.
         # nor can i think of a reason why i should want to.
-        log("scraping appids")
+        if verbose:
+            log("scraping appids")
         for result in results_list:
             try:
                 if (',' in result['data-ds-appid']):  # if it has multible appids which is when it's an old style bundle

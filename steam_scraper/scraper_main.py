@@ -15,6 +15,7 @@ and_page = "&page="
 
 html_file = "test.html"
 
+verbose = False
 
 def run_scrape(is_test, proxy=None):
     log("running scrape")
