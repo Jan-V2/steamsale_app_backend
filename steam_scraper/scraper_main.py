@@ -10,6 +10,8 @@ from steam_scraper.filter import Filter
 from steam_scraper.data_scraper import Data_Scraper
 
 
+urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
+
 steam_special_url_firstpage = "http://store.steampowered.com/search/?specials=1"
 and_page = "&page="
 
