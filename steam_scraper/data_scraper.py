@@ -143,7 +143,7 @@ class Data_Scraper:
                 self.scraped_dict["new_price"].append(save_to_float(new_price))
 
             else:
-                log_warning("could not find price container, probably because the items isn't discounted. appending 0s")
+                log_warning("could not find price container, probably because the item isn't discounted. appending 0s")
                 self.scraped_dict["old_price"].append(float(0))
                 self.scraped_dict["new_price"].append(float(0))
 
