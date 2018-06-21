@@ -2,9 +2,10 @@ import collections
 from pprint import pprint
 
 from my_utils.my_logging import log_message as log, log_warning
-from steam_scraper.scraper_main import verbose
 from my_utils.consts import ints_str_list as ints_str
 import re
+
+verbose = False
 
 
 class Data_Scraper:
