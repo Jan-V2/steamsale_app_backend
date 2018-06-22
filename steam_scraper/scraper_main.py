@@ -11,7 +11,6 @@ from my_utils.util_funcs import listmerger, list_demerger, get_methods_from_clas
 from steam_scraper.filter import Filter
 from steam_scraper.data_scraper import Data_Scraper
 
-
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 steam_special_url_firstpage = "http://store.steampowered.com/search/?specials=1"
@@ -33,7 +32,7 @@ def run_scrape(is_test, proxy=None):
     else:
         num_pages = get_number_pages(http)
     data_scraper = Data_Scraper()
-    data_scraper.scraped_dict = collections.defaultdict(list)# seems to not gc this between runs
+    data_scraper.scraped_dict = collections.defaultdict(list)  # seems to not gc this between runs
 
     # for testing
     # i = 1
@@ -45,7 +44,7 @@ def run_scrape(is_test, proxy=None):
     # log("got page " + str(i) + "/" + str(num_pages))
     # apply_data_scraping(page_results_as_bs4, data_scraper)
 
-    for i in range(1,  num_pages+1):
+    for i in range(1, num_pages + 1):
         page_results_as_bs4 = get_results_from_page_n(i, http)
         log("got page " + str(i) + "/" + str(num_pages))
         apply_data_scraping(page_results_as_bs4, data_scraper)
@@ -62,7 +61,7 @@ def apply_data_scraping(page_as_bs4, data_scraper):
 
 
 def apply_filters(scraped_dict):
-    keys = collections.defaultdict(int)# a dict contianing the indexes for bits of data
+    keys = collections.defaultdict(int)  # a dict contianing the indexes for bits of data
     merged_results = []
 
     i = 0
@@ -82,7 +81,7 @@ def apply_filters(scraped_dict):
 def get_results_from_page_n(page_n, http):
     page_results = []
     if page_n == 1:  # page 1 is special because it has no &page=n
-        url =  steam_special_url_firstpage
+        url = steam_special_url_firstpage
     else:
         url = steam_special_url_firstpage + and_page + str(page_n)
 
@@ -103,6 +102,7 @@ def get_result_list(pages):
         i.clear()
     return results
 
+
 def get_number_pages(http):
     first_page = http.request("GET", steam_special_url_firstpage)
     html_soup = bs4.BeautifulSoup(first_page.data, 'html.parser')
@@ -112,11 +112,12 @@ def get_number_pages(http):
     return int(pages)
 
 
-
-# todo i could make this more effecient by doing basic data scrape -> filter -> rest of datascraping
-if __name__ == '__main__':
-    from pprint import pprint
-    #pprint(run_scrape(True, "http://13.231.152.169:3128"))
+def run_test():
     result = run_scrape(True, None)
     with open(ROOTDIR + dir_sep + "test.json", "w", encoding="utf8")as file:
         json.dump(result, file, indent=4, sort_keys=True)
+
+
+# todo i could make this more effecient by doing basic data scrape -> filter -> rest of datascraping
+if __name__ == '__main__':
+    run_test()
