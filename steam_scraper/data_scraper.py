@@ -97,7 +97,7 @@ class Data_Scraper:
                     break
 
         def save_to_float(_str):
-            _str = re.sub(re.compile("\D"), "", str(_str))
+            _str = re.sub(re.compile("[^\d.]+"), "", str(_str))
             if _str == "":
                 return float(0)
             else:
