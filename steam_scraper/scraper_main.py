@@ -1,9 +1,11 @@
 # -*- coding: utf-8 -*-
 import collections
+import json
 
 import bs4
 import urllib3
 import re
+from my_utils.platform_vars import ROOTDIR, dir_sep
 from my_utils.my_logging import log_message as log, log_return
 from my_utils.util_funcs import listmerger, list_demerger, get_methods_from_class
 from steam_scraper.filter import Filter
@@ -115,4 +117,6 @@ def get_number_pages(http):
 if __name__ == '__main__':
     from pprint import pprint
     #pprint(run_scrape(True, "http://13.231.152.169:3128"))
-    pprint(run_scrape(True, None))
+    result = run_scrape(True, None)
+    with open(ROOTDIR + dir_sep + "test.json", "w", encoding="utf8")as file:
+        json.dump(result, file, indent=4, sort_keys=True)
