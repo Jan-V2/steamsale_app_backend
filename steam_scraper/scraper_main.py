@@ -51,7 +51,16 @@ def run_scrape(is_test, proxy=None):
 
     merged_results, keys = apply_filters(data_scraper.scraped_dict)
     log('scrape done')
-    return merged_results, keys
+
+    # formats results
+    output = []
+    for i in range(len(merged_results)):
+        item = {}
+        for key in keys:
+            item[key] = merged_results[i][keys[key]]
+        output.append(item)
+
+    return output
 
 
 def apply_data_scraping(page_as_bs4, data_scraper):

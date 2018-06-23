@@ -36,8 +36,7 @@ def do_scrape(region_dict, use_proxy=False):
 
     def scrape_and_save(_proxy):
         log("scraping {}".format(region_name))
-        results, keys = run_scrape(is_test=is_test, proxy=_proxy)
-        format_and_save_results(results, keys, region_name)
+        format_and_save_results(run_scrape(is_test=is_test, proxy=_proxy), region_name)
 
     if use_proxy:
         log("scraping with proxy in aws region {}".format(aws_region))
@@ -75,7 +74,7 @@ def do_scrape(region_dict, use_proxy=False):
         scrape_and_save(proxy)
 
 
-def format_and_save_results(results, keys, region_name):
+def format_and_save_results(result, region_name):
     path = downloaded_dir + region_name + ".json"
 
     json_output = {
@@ -84,14 +83,8 @@ def format_and_save_results(results, keys, region_name):
             "minimum_discount": 40,
             "min_reviews": 10,
             "min_positive": 40
-        }, "items": []
+        }, "items": result
     }
-
-    for i in range(len(results)):
-        item = {}
-        for key in keys:
-            item[key] = results[i][keys[key]]
-        json_output["items"].append(item)
 
     with open(path, "w", encoding='UTF-8') as json_file:
         json_file.write(json.dumps(json_output, indent=4))
@@ -103,6 +96,7 @@ def run():
     # todo make filter configurable from the outside.
     # todo make all the names a lot nicer
     # todo add commandline options
+    # todo write fucking unit tests.
 
     regions = {
         "proxyless": [

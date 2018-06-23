@@ -97,11 +97,11 @@ class Data_Scraper:
                     break
 
         def save_to_float(_str):
-            _str = re.sub(re.compile("[^\d.]+"), "", str(_str))
-            if _str == "":
+            output = re.sub(r"[A-Za-z]+", '', _str)
+            if output == "":
                 return float(0)
             else:
-                return float(_str)
+                return float(output)
 
         for result in results_list:
             cont = result.find('div', {'class': 'col search_price discounted responsive_secondrow'})
