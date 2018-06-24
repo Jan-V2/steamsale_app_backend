@@ -97,7 +97,7 @@ class Data_Scraper:
                     break
 
         def save_to_float(_str):
-            output = re.sub(r"[A-Za-z]+", '', _str)
+            output = re.sub(r"[A-Za-z]+", '', str(_str))
             if output == "":
                 return float(0)
             else:

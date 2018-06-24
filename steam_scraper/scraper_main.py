@@ -1,12 +1,14 @@
 # -*- coding: utf-8 -*-
 import collections
 import json
+import traceback
+from pprint import pformat
 
 import bs4
 import urllib3
 import re
 from my_utils.platform_vars import ROOTDIR, dir_sep
-from my_utils.my_logging import log_message as log, log_return
+from my_utils.my_logging import log_message as log, log_return, log_error
 from my_utils.util_funcs import listmerger, list_demerger, get_methods_from_class
 from steam_scraper.filter import Filter
 from steam_scraper.data_scraper import Data_Scraper
@@ -47,7 +49,12 @@ def run_scrape(is_test, proxy=None):
     for i in range(1, num_pages + 1):
         page_results_as_bs4 = get_results_from_page_n(i, http)
         log("got page " + str(i) + "/" + str(num_pages))
-        apply_data_scraping(page_results_as_bs4, data_scraper)
+        try:
+            apply_data_scraping(page_results_as_bs4, data_scraper)
+        except Exception as e:
+            log_error("failed to scrape page {}:".format(i))
+            log_error(traceback.format_exc())
+            log_error(pformat(traceback.format_stack()))
 
     merged_results, keys = apply_filters(data_scraper.scraped_dict)
     log('scrape done')
