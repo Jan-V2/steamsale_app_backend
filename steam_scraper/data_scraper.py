@@ -1,7 +1,8 @@
 import collections
-from pprint import pprint
+import traceback
+from pprint import pprint, pformat
 
-from my_utils.my_logging import log_message as log, log_warning
+from my_utils.my_logging import log_message as log, log_warning, log_error
 from my_utils.consts import ints_str_list as ints_str
 import re
 
@@ -99,9 +100,11 @@ class Data_Scraper:
         def safe_to_float(_str):
             try:
                 return float(_str)
-            except:
+            except Exception as e:
+                log_error("error converting price to float:")
+                log_error(traceback.format_exc())
+                log_error(pformat(traceback.format_stack()))
                 return float(0)
-
 
         for result in results_list:
             cont = result.find('div', {'class': 'col search_price discounted responsive_secondrow'})
