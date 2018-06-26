@@ -49,12 +49,7 @@ def run_scrape(is_test, proxy=None):
     for i in range(1, num_pages + 1):
         page_results_as_bs4 = get_results_from_page_n(i, http)
         log("got page " + str(i) + "/" + str(num_pages))
-        try:
-            apply_data_scraping(page_results_as_bs4, data_scraper)
-        except Exception as e:
-            log_error("failed to scrape page {}:".format(i))
-            log_error(traceback.format_exc())
-            log_error(pformat(traceback.format_stack()))
+        apply_data_scraping(page_results_as_bs4, data_scraper)
 
     merged_results, keys = apply_filters(data_scraper.scraped_dict)
     log('scrape done')

@@ -96,12 +96,12 @@ class Data_Scraper:
                     self.curr_symbol = sym
                     break
 
-        def save_to_float(_str):
-            output = re.sub(r"[A-Za-z]+", '', str(_str))
-            if output == "":
+        def safe_to_float(_str):
+            try:
+                return float(_str)
+            except:
                 return float(0)
-            else:
-                return float(output)
+
 
         for result in results_list:
             cont = result.find('div', {'class': 'col search_price discounted responsive_secondrow'})
@@ -139,8 +139,8 @@ class Data_Scraper:
                 if "Free" in new_price:
                     new_price = 0
 
-                self.scraped_dict["old_price"].append(save_to_float(old_price))
-                self.scraped_dict["new_price"].append(save_to_float(new_price))
+                self.scraped_dict["old_price"].append(safe_to_float(old_price))
+                self.scraped_dict["new_price"].append(safe_to_float(new_price))
 
             else:
                 log_warning("could not find price container, probably because the item isn't discounted. appending 0s")
