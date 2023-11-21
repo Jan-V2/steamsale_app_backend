@@ -1,5 +1,6 @@
 import datetime
 import json
+import os
 import re
 import traceback
 from zipfile import ZipFile, ZIP_DEFLATED
@@ -86,6 +87,10 @@ def format_and_save_results(result, region_name):
         }, "items": result
     }
 
+
+    if not os.path.exists(downloaded_dir):
+        os.makedirs(downloaded_dir)
+
     with open(path, "w", encoding='UTF-8') as json_file:
         json_file.write(json.dumps(json_output, indent=4))
 
@@ -161,7 +166,8 @@ def main():
 
 
 if __name__ == '__main__':
-    main()
+    #main()
+    do_scrape({"eu-central-1": "EU"})
 else:
     print("This file must be run as main.")
 

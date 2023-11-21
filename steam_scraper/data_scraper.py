@@ -16,7 +16,7 @@ class Data_Scraper:
     # a list in which each result lines up with a result from the argument
     # like this ["review_scores": [list of review scores]]
     scraped_dict = collections.defaultdict(list)
-    curr_symbol = None  # this is super inelegant
+    curr_symbol = "€"  # this is super inelegant
     curr_symbol_list = "¥$€£"
 
     def get_user_reviews(self, results):
@@ -66,15 +66,12 @@ class Data_Scraper:
         if verbose:
             log('scraping discount percents')
         discount_percents = []
-        for r in results_list:
-            string = str(r.find("div", {"class": "col search_discount responsive_secondrow"}))
-            span = "<span>"
-            # for some fucking reason not all results have a discount number
-            if string.find(span) != -1:
-                # the +1 and -1 are to cut off the - and the %
-                start = string.find(span) + len(span) + 1
-                end = string.find("</span>") - 1
-                discount_percents.append(int(string[start:end]))
+        for result in results_list:
+
+            discount_elem = result.find("div", {"class", "discount_pct"})
+            if discount_elem is not None:
+                digits = re.findall("\d+", discount_elem.text)[0]
+                discount_percents.append(int(digits))
             else:
                 discount_percents.append(0)
         for item in discount_percents:
@@ -99,6 +96,7 @@ class Data_Scraper:
 
         def safe_to_float(_str):
             try:
+                _str = _str.replace(" ", "")
                 return float(_str)
             except Exception as e:
                 log_error("error converting price to float:")
@@ -107,40 +105,47 @@ class Data_Scraper:
                 return float(0)
 
         for result in results_list:
-            cont = result.find('div', {'class': 'col search_price discounted responsive_secondrow'})
+            def clean(_str):
+                def clean_extra_dots(__str):
+                    # to deal with prices higher that 1000
+                    dots_idx = [m.start() for m in re.finditer("\.", __str)]
+                    if len(dots_idx) > 1:
+                        log("found multible dots in price {}".format(__str))
+                        for dot_idx in reversed(dots_idx[:len(dots_idx) - 1]):
+                            __str = __str[:dot_idx] + __str[dot_idx + 1:]
+                        log("cleaned multible dots. is now {}".format(__str))
+                    return __str
+
+                return clean_extra_dots(
+                    _str.replace(',', '.')
+                    .replace(self.curr_symbol, "")
+                    .replace('--', '0')  # if a price has no decimal places it apparently adds --
+                )
+
+            cont = result.find('div', {'class': 'discount_block'})
             if cont is not None:
-                old_price = cont.find("strike").text
-                new_price = cont.text.replace(old_price, "")
+                elem_old = cont.find("div", {"class": "discount_original_price"})
+                elem_new = cont.find("div", {"class": "discount_final_price"})
+
+                if elem_old:
+                    old_price = elem_old.text
+                    old_price = clean(old_price)
+                else:
+                    old_price = 0
+                if elem_new:
+                    new_price = elem_new.text
+                    new_price = clean(new_price)
+                    new_price = new_price.replace('\t', '') \
+                        .replace('\n', '')
+                    if "Free" in new_price:
+                        new_price = 0
+                else:
+                    new_price = 0
 
                 if self.curr_symbol is None:
                     set_curr_symbol(old_price)
 
-                new_price = new_price.replace('\t', '') \
-                    .replace('\n', '') \
 
-
-                def clean(_str):
-
-                    def clean_extra_dots(__str):
-                        # to deal with prices higher that 1000
-                        dots_idx = [m.start() for m in re.finditer("\.", __str)]
-                        if len(dots_idx) > 1:
-                            log("found multible dots in price {}".format(__str))
-                            for dot_idx in reversed(dots_idx[:len(dots_idx) - 1]):
-                                __str = __str[:dot_idx] + __str[dot_idx + 1:]
-                            log("cleaned multible dots. is now {}".format(__str))
-                        return __str
-
-                    return clean_extra_dots(
-                        _str.replace(',', '.')
-                          .replace(self.curr_symbol, "")
-                             .replace('--', '0')  # if a price has no decimal places it apparently adds --
-                    )
-
-                new_price = clean(new_price)
-                old_price = clean(old_price)
-                if "Free" in new_price:
-                    new_price = 0
 
                 self.scraped_dict["old_price"].append(safe_to_float(old_price))
                 self.scraped_dict["new_price"].append(safe_to_float(new_price))

@@ -7,7 +7,9 @@ class Filter:
     # every methode in this class will be applied to the the results
     # they all must take the list of results as an argument and returns the filtered list
 
-
+    # parameters to filter out crud
+    min_reviews = 10
+    min_positive = 30
     minimum_discount = 40
 
     def get_highly_discounted(self, merged_results, keys):
@@ -19,14 +21,10 @@ class Filter:
         for i in range(0, len(merged_results)):
             if merged_results[i][percents_index] < self.minimum_discount:
                 break
-        merged_results = merged_results[:i]
+        #merged_results = merged_results[:i]
         log(str(len(merged_results)) + " out of " + str(before) + " had deep enough discount")
         return merged_results
 
-    # parameters for get_good_games
-
-    min_reviews = 10
-    min_positive = 40
 
     def get_good_games(self, merged_results, keys):
         n_rev_idx = keys['n_user_reviews']
